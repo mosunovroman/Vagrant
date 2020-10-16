@@ -1,58 +1,70 @@
-$mach_quant = 3
-Vagrant.configure("2") do |config| 
-  config.vm.provider "virtualbox" do |vb|
-	vb.gui=false
-	vb.memory=256
-	vb.cpus=1
-	vb.check_guest_additions=false
-  config.vm.box_check_update=false
-  config.vm.box="ubuntu/trusty64"
-  end
-  (1..$mach_quant).each do |i|
-	config.vm.define "node#{i}" do |node|
-		node.vm.network :private_network, ip: "192.168.100.#{24+i}"
-		node.vm.hostname= "node#{i}"
-	end
-  end
-  
-  
-  
-  
-  # config.vm.define :infra do |main| 
-    # main.vm.box = "ubuntu/focal64" 
-    # main.vm.hostname = "infra" 
-    # config.vm.network :forwarded_port, guest: 80, host: 8080 
-    # config.vm.network :private_network, ip: "192.168.100.13" 
-    # main.vm.provider :virtualbox do |vb| 
-      # vb.customize ["modifyvm", :id, "--memory", "1048"] 
-    # end 
-	
-  # #  config.vm.provision :chef_solo do |chef| 
-  # #    chef.log_level = :info 
-  # #    chef.roles_path = "roles" 
-  # #    chef.data_bags_path = "data_bags" 
-  # #    chef.add_role "base" 
-  # #    chef.add_role "zabbix-db" 
-  # #    chef.add_role "zabbix-server" 
-  # #    chef.add_role "graylog2" 
-  # #  end 
-  # end 
- 
-# config.vm.define :vm1 do |main| 
-    # main.vm.box = "ubuntu/focal64" 
-    # main.vm.hostname = "vm1" 
-    # config.vm.network :forwarded_port, guest: 80, host: 8001 
-    # config.vm.network :private_network, ip: "192.168.100.14" 
-    # main.vm.provider :virtualbox do |vb| 
-      # vb.customize ["modifyvm", :id, "--memory", "2048"] 
-    # end 
-    # config.vm.provision :chef_solo do |chef| 
-      # chef.log_level = :info 
-      # chef.roles_path = "roles" 
-      # chef.data_bags_path = "data_bags" 
-      # chef.add_role "base" 
-      # chef.add_role "zabbix-client" 
-      # chef.add_role "projectname" 
-    # end 
-  # end 
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#задаём переменные с количеством машин
+
+$dev_mach = 5
+$db_mach = 2
+$lamp_mach = 2
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.box_check_update = false
+
+#Cоздаём машины для разработчиков, количество задали в переменных.
+#Пул ip адресов перенесли, чтоб не пересекались с другими машинами.
+
+   (1..$dev_mach).each do |i|
+        config.vm.define "dev#i" do |dev|
+         dev.vm.network  "public_network", ip: "192.168.1.#{10+i}"
+         dev.vm.hostname = "dev#{i}"  
+         dev.vm.provider "virtualbox" do |vb|
+                vb.memory = "1096"
+         end
+        end
+   end
+
+
+#Создаём машины для баз данных.
+
+   (1..$db_mach).each do |i|
+        config.vm.define "db#i" do |db|
+         db.vm.network "public_network", ip: "192.168.1.#{50+i}"
+         db.vm.hostname = "db#{i}"  
+         db.vm.provider "virtualbox" do |vb|
+                vb.memory = "1024"
+         end
+        end
+   end
+#Создамём машину для сервера непрерывной интеграции.
+
+ config.vm.define "ci" do |ci|
+     ci.vm.network "public_network", ip: "192.168.1.60"
+     ci.vm.hostname = "ci"  
+     ci.vm.provider "virtualbox" do |vb|
+         vb.memory = "1048"
+     end
  end
+#Создаём машины для разворачивания приложения
+
+    (1..$lamp_mach).each do |i|
+         config.vm.define "lamp#{i}" do |lamp|
+          lamp.vm.network "public_network", ip: "192.168.1.#{150+i}"
+          lamp.vm.hostname = "lamp_node#{i}"  
+          lamp.vm.provider "virtualbox" do |vb|
+           vb.memory = "512"
+          end
+         end
+     end
+#Создаём машину для шлюза.
+
+ config.vm.define "gate" do |gate|
+     gate.vm.network "public_network", ip: "192.168.1.2"
+     gate.vm.hostname = "gate"  
+     gate.vm.provider "virtualbox" do |vb|
+         vb.memory = "512"
+     end
+ end
+
+
+end
