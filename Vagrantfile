@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
 #Пул ip адресов перенесли, чтоб не пересекались с другими машинами.
 
    (1..$dev_mach).each do |i|
-        config.vm.define "dev#i" do |dev|
+        config.vm.define "dev#{i}" do |dev|
          dev.vm.network  "public_network", ip: "192.168.1.#{10+i}"
          dev.vm.hostname = "dev#{i}"  
          dev.vm.provider "virtualbox" do |vb|
@@ -28,7 +28,7 @@ Vagrant.configure(2) do |config|
 #Создаём машины для баз данных.
 
    (1..$db_mach).each do |i|
-        config.vm.define "db#i" do |db|
+        config.vm.define "db#{i}" do |db|
          db.vm.network "public_network", ip: "192.168.1.#{50+i}"
          db.vm.hostname = "db#{i}"  
          db.vm.provider "virtualbox" do |vb|
