@@ -8,7 +8,7 @@ $db_mach = 2
 $lamp_mach = 2
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/focal64"
   config.vm.box_check_update = false
 
 #Cоздаём машины для разработчиков, количество задали в переменных.
